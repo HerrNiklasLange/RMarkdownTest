@@ -1,0 +1,94 @@
+---
+title: "Fires in Scotland"
+author: "Niklas Lange"
+date: 2020-12-01T21:13:14-05:00
+categories: ["R"]
+tags: ["R Markdown", "plot", "regression"]
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r AverageDay_Year,echo=FALSE, message=FALSE}
+library(tidyverse) #library to make programme run
+library(sf)
+library(leaflet)
+library(htmlwidgets)
+library(RColorBrewer)
+library(htmltools)
+library(formattable)
+library(readxl)
+library(ggplot2)
+library(ggpubr)
+library(plyr)
+
+
+setwd("C:\\Users\\nikla\\programming_projects\\R\\maps")
+
+CouncilArea <- read_excel("datasets/CouncilAreas.xlsx")
+
+criteria <- c("2020/2021", "2019/2020", "2018/2019", "2017/2018", "2016/2017")
+df1 <- CouncilArea %>%
+  filter(Reference %in% "2020/2021") %>% select(-Reference)
+df2 <- CouncilArea %>%
+  filter(Reference %in% "2019/2020") %>% select(-Reference)
+df3 <- CouncilArea %>%
+  filter(Reference %in% "2018/2019") %>% select(-Reference)
+df4 <- CouncilArea %>%
+  filter(Reference %in% "2017/2018") %>% select(-Reference)
+df5 <- CouncilArea %>%
+  filter(Reference %in% "2016/2017") %>% select(-Reference)
+
+year <- 5
+day <- 5 * 365.25
+
+All <- df1$All + df2$All + df3$All + df4$All +df5$All
+YearAll <- All / year
+DayAll <- All / day
+DayAll <- formattable(DayAll, digits = 2, format = "f")
+
+Accidental <- df1$Accidental + df2$Accidental + df3$Accidental + df4$Accidental +df5$Accidental
+YearAccidental <- Accidental / year
+DayAccidental <- Accidental /day
+DayAccidental <- formattable(DayAccidental, digits = 2, format = "f")
+
+NotAccidental <- df1$NotAccidental + df2$NotAccidental + df3$NotAccidental + df4$NotAccidental +df5$NotAccidental
+YearNotAccidental <- NotAccidental / year
+DayNotAccidental <- NotAccidental /day
+DayNotAccidental <- formattable(DayNotAccidental, digits = 2, format = "f")
+ CouncilArea %>%
+  filter(Reference %in% criteria)
+CouncilArea <- CouncilArea %>% select(-Reference)
+  
+x <- 25945.6/365.25
+y <- 14842/365.25
+rm(AverageDay_Year)
+rm(AverageDay_YearScotland)
+AverageDay_YearScotland <- data.frame(Region=c("Scotland"),
+                               All_Year= (25945.6),
+                               All_Day= (x),
+                               Accidental_Year=  (11103.6),
+                               Accidental_Day= (30.4),
+                               NotAccidental_Year= (14842),
+                               NotAccidental_Day = (y))
+AverageDay_Year <- data.frame(Region= df1$CouncilAreas,
+                                       All_Year= YearAll,
+                                       All_Day= DayAll,
+                                       Accidental_Year=  YearAccidental,
+                                       Accidental_Day= DayAccidental,
+                                       NotAccidental_Year= YearNotAccidental,
+                                       NotAccidental_Day = DayNotAccidental)
+
+AverageDay_Year <- rbind( AverageDay_YearScotland,AverageDay_Year)
+
+AverageDay_Year <- AverageDay_Year %>%
+  formattable(AverageDay_Year$All_Day, digits = 2, format = "f") %>%
+  formattable(AverageDay_Year$Accidental_Day, digits = 2, format = "f") %>%
+  formattable(AverageDay_Year$NotAccidental_Day, digits = 2, format = "f")
+library(knitr)
+library(DT)
+DT::datatable(AverageDay_Year)
+```
+
